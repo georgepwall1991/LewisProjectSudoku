@@ -1,0 +1,86 @@
+using System;
+using System.Windows.Forms;
+
+namespace SimpleSudoku
+{
+    public class SudokuForm : Form
+    {
+        private readonly TextBox[,] textBoxes = new TextBox[9, 9];
+
+        public SudokuForm()
+        {
+            InitializeComponent();
+            InitializeTextBoxes();
+            InitializeCheckSolutionButton();
+        }
+
+        private void InitializeTextBoxes()
+        {
+            for (var row = 0; row < 9; row++)
+            for (var col = 0; col < 9; col++)
+            {
+                textBoxes[row, col] = new TextBox();
+                textBoxes[row, col].Width = 30;
+                textBoxes[row, col].Height = 30;
+                textBoxes[row, col].Left = 30 * col;
+                textBoxes[row, col].Top = 30 * row;
+                textBoxes[row, col].MaxLength = 1;
+                Controls.Add(textBoxes[row, col]);
+            }
+        }
+
+        private void InitializeCheckSolutionButton()
+        {
+            var checkSolutionButton = new Button();
+            checkSolutionButton.Text = "Check Solution";
+            checkSolutionButton.Width = 100;
+            checkSolutionButton.Height = 50;
+            checkSolutionButton.Left = 300;
+            checkSolutionButton.Top = 250;
+            checkSolutionButton.Click += CheckSolutionButton_Click;
+            Controls.Add(checkSolutionButton);
+        }
+
+        private void CheckSolutionButton_Click(object sender, EventArgs e)
+        {
+            var board = new int[9, 9];
+            for (var row = 0; row < 9; row++)
+            for (var col = 0; col < 9; col++)
+                if (textBoxes[row, col].Text == "")
+                    board[row, col] = 0;
+                else
+                    board[row, col] = int.Parse(textBoxes[row, col].Text);
+
+            if (IsSudokuSolutionValid(board))
+                MessageBox.Show("Correct solution!");
+            else
+                MessageBox.Show("Incorrect solution.");
+        }
+
+        private bool IsSudokuSolutionValid(int[,] board)
+        {
+            for (var row = 0; row < 9; row++)
+            for (var col = 0; col < 9; col++)
+            {
+                var num = board[row, col];
+                if (num < 1 || num > 9) return false;
+
+                for (var i = 0; i < 9; i++)
+                {
+                    if (i != row && board[i, col] == num) return false;
+
+                    if (i != col && board[row, i] == num) return false;
+                }
+
+                var rowStart = row / 3 * 3;
+                var colStart = col / 3 * 3;
+                for (var i = rowStart; i < rowStart + 3; i++)
+                for (var j = colStart; j < colStart + 3; j++)
+                    if (i != row && j != col && board[i, j] == num)
+                        return false;
+            }
+
+            return true;
+        }
+    }
+}
